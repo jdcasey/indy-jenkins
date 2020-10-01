@@ -11,11 +11,10 @@ pipeline {
       metadata:
         labels:
           app: "jenkins-${env.JOB_BASE_NAME}"
-          indy-pipeline-build-number: "${env.BUILD_NUMBER}"
       spec:
         containers:
         - name: jnlp
-          image: quay.io/kaine/indy-stress-tester:latest
+          image: registry.redhat.io/openshift3/jenkins-agent-maven-35-rhel7:v3.11.219-1
           imagePullPolicy: Always
           tty: true
           env:
@@ -23,40 +22,14 @@ pipeline {
             value: 'jenkins-k8s-config'
           - name: HOME
             value: /home/jenkins
-          - name: JAVA_TOOL_OPTIONS
-            value: '-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Dsun.zip.disableMemoryMapping=true -Xms1024m -Xmx5g'
-          - name: MAVEN_OPTS
-            value: -Xmx8g -Xms1024m -XX:MaxPermSize=512m -Xss8m
-          - name: NPMREGISTRY
-            value: 'https://repository.engineering.redhat.com/nexus/repository/registry.npmjs.org'
           resources:
             requests:
-              memory: 6Gi
+              memory: 4Gi
               cpu: 2000m
             limits:
-              memory: 6Gi
-              cpu: 2000m
-          volumeMounts:
-          - mountPath: /home/jenkins/sonatype
-            name: volume-0
-          - mountPath: /home/jenkins/gnupg_keys
-            name: volume-1
-          - mountPath: /mnt/ocp
-            name: volume-2
+              memory: 5Gi
+              cpu: 4000m
           workingDir: /home/jenkins
-        volumes:
-        - name: volume-0
-          secret:
-            defaultMode: 420
-            secretName: sonatype-secrets
-        - name: volume-1
-          secret:
-            defaultMode: 420
-            secretName: gnupg
-        - name: volume-2
-          configMap:
-            defaultMode: 420
-            name: jenkins-openshift-mappings
       """
     }
   }
